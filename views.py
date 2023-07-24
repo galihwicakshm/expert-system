@@ -57,8 +57,8 @@ def admin():
         return redirect(url_for("views.login"))
 
 
-@views.route("/"aturanLogika.html")
-def aturanLogika.html():
+@views.route('/templates/aturanLogika.html')
+def aturanLogika():
     data_aturan = list(aturan.find({}, {"Kondisi": 1,
                                         "Jawaban": 1,
                                         "Indikasi": 1}))
@@ -66,20 +66,20 @@ def aturanLogika.html():
     return render_template("aturanLogika.html", data_aturan=data_aturan)
 
 
-@views.route("/"basis_pengetahuan.html")
-def basis_pengetahuan.html():
+@views.route("/templates/basis_pengetahuan.html")
+def basis_pengetahuan():
     data_pengetahuan = list(pengetahuan.find({}, {"pertanyaan": 1,
                                                   "jawaban": 1}))
 
     return render_template("basis_pengetahuan.html_pengetahuan.html", data_pengetahuan=data_pengetahuan)
 
 
-@views.route("/"about")
+@views.route("/templates/about")
 def about():
-    return render_template("about.html")
+    return render_template("/templates/about")
 
 
-@views.route("/"visual")
+@views.route("/templates/visual")
 @cache.cached()
 def visual():
     # timeseries data jumlah kasus kekerasan 2016-2022

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify, session
-import pandas as pd 
+import pandas as pd
 import numpy as np
 import json
 import plotly
@@ -9,9 +9,10 @@ from app import client, db, pengguna, admin_tabel, pertanyaan_identifikasi, atur
 import sklearn
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
-from passlib.hash import pbkdf2_sha256 
+from passlib.hash import pbkdf2_sha256
 
 views = Blueprint(__name__, "views")
+
 
 @views.route('/')
 def home():
@@ -19,6 +20,7 @@ def home():
         return render_template("index.html")
     else:
         return redirect(url_for("views.login"))
+
 
 @views.route('/admin')
 def admin():
@@ -31,10 +33,11 @@ def admin():
 
         # Mengambil data dari database
         data_personal = list(datakorban.find({}, {"namakorban": 1,
-                                                             "usiakorban": 1,
-                                                              "pendidikankorban": 1,
-                                                               "asalkorban": 1}))
-        data_inferensi = list(pertanyaan_identifikasi.find({}, {"hasil_inferensi": 1}))
+                                                  "usiakorban": 1,
+                                                  "pendidikankorban": 1,
+                                                  "asalkorban": 1}))
+        data_inferensi = list(
+            pertanyaan_identifikasi.find({}, {"hasil_inferensi": 1}))
 
         # Menggabungkan data pengguna dan data pertanyaan menjadi satu list
         data_gabungan = []
@@ -45,48 +48,52 @@ def admin():
                 "tingkat_pendidikan": data_personal[i].get("pendidikankorban"),
                 "asal_provinsi": data_personal[i].get("asalkorban"),
                 "hasil_inferensi": data_inferensi[i].get("hasil_inferensi")
-                })
+            })
 
-        return render_template("admin.html", total_users=total_users, total_kasus=total_kasus, 
-                                total_pengetahuan=total_pengetahuan, total_aturan=total_aturan, 
-                                data=data_gabungan)
+        return render_template("admin.html", total_users=total_users, total_kasus=total_kasus,
+                               total_pengetahuan=total_pengetahuan, total_aturan=total_aturan,
+                               data=data_gabungan)
     else:
         return redirect(url_for("views.login"))
 
-@views.route("/aturan_logika")
+
+@views.route("/"aturan_logika")
 def aturan_logika():
     data_aturan = list(aturan.find({}, {"Kondisi": 1,
-                                                        "Jawaban":1,
-                                                        "Indikasi":1}))
-    
+                                        "Jawaban": 1,
+                                        "Indikasi": 1}))
+
     return render_template("aturanLogika.html", data_aturan=data_aturan)
 
-@views.route("/basis")
+
+@views.route("/"basis")
 def basis():
     data_pengetahuan = list(pengetahuan.find({}, {"pertanyaan": 1,
-                                                        "jawaban":1}))
-    
+                                                  "jawaban": 1}))
+
     return render_template("basis_pengetahuan.html", data_pengetahuan=data_pengetahuan)
 
-@views.route("/about")
+
+@views.route("/"about")
 def about():
     return render_template("about.html")
 
-@views.route("/visual")
+
+@views.route("/"visual")
 @cache.cached()
 def visual():
     # timeseries data jumlah kasus kekerasan 2016-2022
     df = pd.read_csv('static\data\jumlah_kekerasan_7tahun.csv')
     figure1 = px.line(df,
                       x="Tahun",
-                      y="Jumlah Kasus", 
+                      y="Jumlah Kasus",
                       title="Tren Jumlah Kasus Kekerasan Terhadap Perempuan (2016-2022)",
                       markers=True)
     figure1.update_traces(textposition="top center")
     figure1.update_layout(width=500,
                           height=400,
                           title_font_size=14)
-    graph1JSON = json.dumps(figure1, 
+    graph1JSON = json.dumps(figure1,
                             cls=plotly.utils.PlotlyJSONEncoder)
 
     # piechart data jenis kekerasan 2016-2022
@@ -101,34 +108,38 @@ def visual():
     figure2.update_layout(width=500,
                           height=400,
                           title_font_size=14)
-    graph2JSON = json.dumps(figure2, 
+    graph2JSON = json.dumps(figure2,
                             cls=plotly.utils.PlotlyJSONEncoder)
 
-    return render_template("visualization.html", graph1JSON = graph1JSON, graph2JSON = graph2JSON)
+    return render_template("visualization.html", graph1JSON=graph1JSON, graph2JSON=graph2JSON)
 
-@views.route("/identify")
+
+@views.route("/"identify")
 def identify():
     return render_template("identify.html")
 
-@views.route("/identify-tanya")
+
+@views.route("/"identify-tanya")
 def pertanyaan():
     return render_template('identify-tanya.html')
 
-@views.route("/save-data", methods=['POST'])
+
+@views.route("/"save-data", methods=['POST'])
 def save_data():
     nama_lengkap = request.form['namakorban']
     usia = request.form['usiakorban']
     tingkat_pendidikan = request.form['pendidikankorban']
     asal_provinsi = request.form['asalkorban']
 
-    data = {'namakorban':nama_lengkap,
-            'usiakorban':usia,
-            'pendidikankorban':tingkat_pendidikan,
-            'asalkorban':asal_provinsi}
+    data = {'namakorban': nama_lengkap,
+            'usiakorban': usia,
+            'pendidikankorban': tingkat_pendidikan,
+            'asalkorban': asal_provinsi}
 
     datakorban.insert_one(data)
 
     return redirect(url_for("views.pertanyaan"))
+
 
 # pemodelan data
 df = pd.read_csv("data_for_modelling.csv")
@@ -154,19 +165,23 @@ basis_pengetahuan = {
 }
 
 # Fungsi untuk melakukan inferensi menggunakan basis pengetahuan dan aturan logika
+
+
 def inferensi(data_input):
     with open('aturan_logika.json') as file:
         aturan_logika = json.load(file)
-        
+
     for aturan in aturan_logika:
         kondisi = aturan['kondisi']
-        match = all(data_input.get(kunci) == nilai for kunci, nilai in kondisi.items())
+        match = all(data_input.get(kunci) == nilai for kunci,
+                    nilai in kondisi.items())
         if match:
             return aturan['indikasi']
-    
+
     return 'Tidak ditemukan indikasi yang sesuai'
 
-@views.route("/save-tanya", methods=['POST'])
+
+@views.route("/"save-tanya", methods=['POST'])
 def save_tanya():
     jawaban1 = int(request.form['jawaban1'])
     jawaban2 = int(request.form['jawaban2'])
@@ -199,7 +214,8 @@ def save_tanya():
     }
 
     # Ubah data input ke dalam format numerik sesuai dengan basis pengetahuan
-    data_numerik = {kunci: basis_pengetahuan[kunci].index(data_input[kunci]) for kunci in data_input}
+    data_numerik = {kunci: basis_pengetahuan[kunci].index(
+        data_input[kunci]) for kunci in data_input}
 
     # Lakukan pemodelan data dengan machine learning menggunakan model Anda
     hasil_pemodelan = model.predict([list(data_numerik.values())])
@@ -207,31 +223,33 @@ def save_tanya():
     # Gunakan hasil pemodelan data sebagai input untuk inferensi
     hasil_inferensi = inferensi(data_numerik)
 
-    # simpan data jawaban ke 
-    data = {'jawaban1' : jawaban1,
-            'jawaban2' : jawaban2,
-            'jawaban3' : jawaban3,
-            'jawaban4' : jawaban4,
-            'jawaban5' : jawaban5,
-            'jawaban6' : jawaban6,
-            'jawaban7' : jawaban7,
-            'jawaban8' : jawaban8,
-            'jawaban9' : jawaban9,
-            'jawaban10' : jawaban10,
-            'jawaban11' : jawaban11,
-            'jawaban12' : jawaban12,
-            'jawaban13' : jawaban13,
-            'hasil_inferensi' : hasil_inferensi}
+    # simpan data jawaban ke
+    data = {'jawaban1': jawaban1,
+            'jawaban2': jawaban2,
+            'jawaban3': jawaban3,
+            'jawaban4': jawaban4,
+            'jawaban5': jawaban5,
+            'jawaban6': jawaban6,
+            'jawaban7': jawaban7,
+            'jawaban8': jawaban8,
+            'jawaban9': jawaban9,
+            'jawaban10': jawaban10,
+            'jawaban11': jawaban11,
+            'jawaban12': jawaban12,
+            'jawaban13': jawaban13,
+            'hasil_inferensi': hasil_inferensi}
 
     pertanyaan_identifikasi.insert_one(data)
 
     return render_template('hasil.html', hasil_inferensi=hasil_inferensi)
 
+
 @views.route('/hasil', methods=['GET'])
 def hasil_identifikasi():
     return render_template('hasil.html', hasil_inferensi=hasil_inferensi, hasil_pemodelan=hasil_pemodelan[0])
 
-@views.route("/login", methods=['GET', 'POST'])
+
+@views.route("/"login", methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['emailuser']
@@ -262,15 +280,17 @@ def login():
                 return 'Username atau password salah!'
         else:
             return 'Username tidak ditemukan!'
-    
+
     return render_template('login.html')
+
 
 @views.route('/logout')
 def logout():
     session.pop('emailuser', None)
     return redirect(url_for("views.login"))
 
-@views.route("/signup", methods=['GET', 'POST'])
+
+@views.route("/"signup", methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
         username = request.form['emailuser']
@@ -288,5 +308,5 @@ def signup():
         new_user = {'emailuser': username, 'passuser': hashed_password}
         pengguna.insert_one(new_user)
         return redirect(url_for("views.login"))
-    
+
     return render_template('signup.html')

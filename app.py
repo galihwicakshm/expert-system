@@ -25,7 +25,7 @@ app.config['CACHE_TYPE'] = 'simple'  # Jenis cache sederhana
 app.config['CACHE_DEFAULT_TIMEOUT'] = 300
 app.config['CACHE_KEY_PREFIX'] = 'myapp_'  # Awalan kunci cache
 
-app.register_blueprint(views, url_prefix="/"views")
+app.register_blueprint(views, url_prefix="/templates/")
 
 if __name__ == "__main__":
     app.run(debug=True)

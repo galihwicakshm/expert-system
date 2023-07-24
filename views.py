@@ -57,8 +57,8 @@ def admin():
         return redirect(url_for("views.login"))
 
 
-@views.route("/"aturan_logika.html")
-def aturan_logika.html():
+@views.route("/"aturanLogika.html")
+def aturanLogika.html():
     data_aturan = list(aturan.find({}, {"Kondisi": 1,
                                         "Jawaban": 1,
                                         "Indikasi": 1}))
@@ -66,12 +66,12 @@ def aturan_logika.html():
     return render_template("aturanLogika.html", data_aturan=data_aturan)
 
 
-@views.route("/"basis.html")
-def basis.html():
+@views.route("/"basis_pengetahuan.html")
+def basis_pengetahuan.html():
     data_pengetahuan = list(pengetahuan.find({}, {"pertanyaan": 1,
                                                   "jawaban": 1}))
 
-    return render_template("basis.html_pengetahuan.html", data_pengetahuan=data_pengetahuan)
+    return render_template("basis_pengetahuan.html_pengetahuan.html", data_pengetahuan=data_pengetahuan)
 
 
 @views.route("/"about")
@@ -148,7 +148,7 @@ y = df['target']
 model = LogisticRegression()
 model.fit(X, y)
 
-basis.html_pengetahuan = {
+basis_pengetahuan.html_pengetahuan = {
     'hubungan_pelaku': [0, 1, 2],
     'tempat_kekerasan': [0, 1, 2, 3],
     'kekerasan_fisik': [0, 1],
@@ -164,14 +164,14 @@ basis.html_pengetahuan = {
     'keterbatasan_sumber_daya': [0, 1]
 }
 
-# Fungsi untuk melakukan inferensi menggunakan basis.html pengetahuan dan aturan logika
+# Fungsi untuk melakukan inferensi menggunakan basis_pengetahuan.html pengetahuan dan aturan logika
 
 
 def inferensi(data_input):
-    with open('aturan_logika.html.json') as file:
-        aturan_logika.html = json.load(file)
+    with open('aturanLogika.html.json') as file:
+        aturanLogika.html = json.load(file)
 
-    for aturan in aturan_logika.html:
+    for aturan in aturanLogika.html:
         kondisi = aturan['kondisi']
         match = all(data_input.get(kunci) == nilai for kunci,
                     nilai in kondisi.items())
@@ -213,8 +213,8 @@ def save_tanya():
         'keterbatasan_sumber_daya': jawaban13
     }
 
-    # Ubah data input ke dalam format numerik sesuai dengan basis.html pengetahuan
-    data_numerik = {kunci: basis.html_pengetahuan[kunci].index(
+    # Ubah data input ke dalam format numerik sesuai dengan basis_pengetahuan.html pengetahuan
+    data_numerik = {kunci: basis_pengetahuan.html_pengetahuan[kunci].index(
         data_input[kunci]) for kunci in data_input}
 
     # Lakukan pemodelan data dengan machine learning menggunakan model Anda

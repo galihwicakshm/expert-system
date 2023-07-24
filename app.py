@@ -14,7 +14,7 @@ pengguna = db.dataPengguna
 admin_tabel = db.dataAdmin
 pertanyaan_identifikasi = db.pertanyaanidentifikasi
 aturan = db.aturanLogika
-pengetahuan = db.basis.htmlPengetahuan
+pengetahuan = db.basis_pengetahuan.htmlPengetahuan
 datakorban = db.datapersonalkorban
 
 cache = Cache(app)
